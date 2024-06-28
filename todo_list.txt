@@ -1,0 +1,7 @@
+
+Alternative download for AIA and HMI
+Jsoc can be used to download
+http://jsoc.stanford.edu/
+
+See an example in https://github.com/RobertJaro/MultiChannelCHDetection/tree/main
+

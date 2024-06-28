@@ -10,7 +10,8 @@ import matplotlib.pyplot as plt
 import pdb
 import numpy as np
 import requests
-
+import calendar 
+import subprocess
 
 def initial_final_time(time_ini, time_final, delta_t=''):
     #Transformar esto en una funcion. Le doy T0, Tf, y deltaT y me devuelve ini y fin. ver como meter esta funcion en las clases e importarla.
@@ -1200,8 +1201,61 @@ class euvi_downloader:
             print(f'Archivos descargados en: {download_path}')
 
 
+class nrl_massive_downloader:
+    """
+    TODO: convert the display method in a table with the dates and the images available.
+    descarga masiva de imagenes de NRL 0.5 de c2/c3/
+    La descarga minima es diara.
+    descarga_test = nrl_massive_downloader(start_time,end_time)
+    descarga_test.create() #creates the list of dates to download in format YYMMDD
+    descarga_test.display() #display the list of dates
+    descarga_test.download() #downloads the images from the list
+    """
+    def __init__(self, start_time, end_time,instrument='c2'):
+        try:
+            self.start_time = start_time
+            self.end_time = end_time
+            self.instrument = instrument
+            self.dir_descarga = '/media/gehme/gehme/data/soho/lasco/level_05/c2/'
+        except TypeError:
+            print("Be sure to add start_time, end_time, ship name when creating of object of this class.")
+            raise
+        except:
+            print("WTF")
+            
+    def create(self, download_path=None):
+        """
+        Definicion del metodo download.
+        """
+        string_list = []
+        current_date = self.start_time
+        while current_date <= self.end_time:
+            year_aux = str(current_date.year)[2:]  # Extract last two digits of year
+            string_month = "{:02d}".format(current_date.month)
+            string_day = "{:02d}".format(current_date.day)
+            string_list.append(year_aux + string_month + string_day)
+            current_date += timedelta(days=1)   # Increment date by 1 day
+        self.list_dates = string_list
 
+    def display(self,):
+        print(self.list_dates)
+        #we can download the txt file in the url and show that as a table.
 
+    def download(self,directory=None):
+        # Mirror the directory with wget command
+        #"https://lasco-www.nrl.navy.mil/lz/level_05/200104/c2/"
+        if directory:
+            self.dir_descarga = directory
+        for date in self.list_dates:
+            url = f"https://lasco-www.nrl.navy.mil/lz/level_05/{date}/{self.instrument}/"
+            command = ["wget", "-m", "-nH", "--cut-dirs=4", "-np", "-A", "fts", url, "-P", self.dir_descarga]
+            subprocess.run(command, check=True)
+
+    def clean(self,):
+        """
+        limpieza de archivos descargados que pesen menos de 2Mb
+        """
+        
 
 
 
