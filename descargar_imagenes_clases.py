@@ -1216,7 +1216,7 @@ class nrl_massive_downloader:
             self.start_time = start_time
             self.end_time = end_time
             self.instrument = instrument
-            self.dir_descarga = '/media/gehme/gehme/data/soho/lasco/level_05/c2/'
+            self.dir_descarga = '/gehme/data/soho/lasco/level_05/c2/'
         except TypeError:
             print("Be sure to add start_time, end_time, ship name when creating of object of this class.")
             raise
@@ -1228,14 +1228,17 @@ class nrl_massive_downloader:
         Definicion del metodo download.
         """
         string_list = []
+        folder_list = []
         current_date = self.start_time
         while current_date <= self.end_time:
             year_aux = str(current_date.year)[2:]  # Extract last two digits of year
             string_month = "{:02d}".format(current_date.month)
             string_day = "{:02d}".format(current_date.day)
             string_list.append(year_aux + string_month + string_day)
+            folder_list.append(str(current_date.year)+ string_month + string_day)
             current_date += timedelta(days=1)   # Increment date by 1 day
         self.list_dates = string_list
+        self.folder_list = folder_list
 
     def display(self,):
         print(self.list_dates)
@@ -1244,17 +1247,23 @@ class nrl_massive_downloader:
     def download(self,directory=None):
         # Mirror the directory with wget command
         #"https://lasco-www.nrl.navy.mil/lz/level_05/200104/c2/"
+
         if directory:
             self.dir_descarga = directory
-        for date in self.list_dates:
+        for index,date in enumerate(self.list_dates):
             url = f"https://lasco-www.nrl.navy.mil/lz/level_05/{date}/{self.instrument}/"
-            command = ["wget", "-m", "-nH", "--cut-dirs=4", "-np", "-A", "fts", url, "-P", self.dir_descarga]
+            folder = self.folder_list[index]
+            command = ["wget", "-m", "-nH", "--cut-dirs=4", "-np", "-A", "fts", url, "-P", self.dir_descarga+str(folder)+"/"]
             subprocess.run(command, check=True)
 
     def clean(self,):
         """
-        limpieza de archivos descargados que pesen menos de 2Mb
+        limpieza de archivos descargados que pesen menos de 2Mb en cada folder.
         """
+        for folder in list(set(self.folder_list)):
+            for file in os.listdir(self.dir_descarga+str(folder)):
+                if os.path.getsize(self.dir_descarga+str(folder)+"/"+file) < 2000000:
+                    os.remove(self.dir_descarga+str(folder)+"/"+file)
         
 
 
