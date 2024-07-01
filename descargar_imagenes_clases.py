@@ -12,6 +12,7 @@ import numpy as np
 import requests
 import calendar 
 import subprocess
+import requests
 
 def initial_final_time(time_ini, time_final, delta_t=''):
     #Transformar esto en una funcion. Le doy T0, Tf, y deltaT y me devuelve ini y fin. ver como meter esta funcion en las clases e importarla.
@@ -1253,8 +1254,17 @@ class nrl_massive_downloader:
         for index,date in enumerate(self.list_dates):
             url = f"https://lasco-www.nrl.navy.mil/lz/level_05/{date}/{self.instrument}/"
             folder = self.folder_list[index]
-            command = ["wget", "-m", "-nH", "--cut-dirs=4", "-np", "-A", "fts", url, "-P", self.dir_descarga+str(folder)+"/"]
-            subprocess.run(command, check=True)
+            response = requests.head(url, allow_redirects=True)
+            if response == 404:
+                print(f"Date {date} not available")
+            if response.status_code == 200:
+                try:
+                    command = ["wget", "-m", "-nH", "--cut-dirs=4", "-np", "-A", "fts", url, "-P", self.dir_descarga+str(folder)+"/"]
+                    subprocess.run(command, check=True)
+                    print(f"Date {date} downloaded")
+                except subprocess.CalledProcessError:
+                    print(f"Error downloading date {date}")
+                    return
 
     def clean(self,):
         """
