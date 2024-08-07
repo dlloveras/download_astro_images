@@ -446,9 +446,8 @@ class cor2_downloader:
             self.instrumento = a.Instrument.secchi
             self.detector = a.Detector.cor2
             self.nave  = nave
-            self.dir_descarga = '/media/gehme/gehme/data/stereo/'
+            self.dir_descarga = '/gehme/gehme/data/stereo/'
             #self.dir_descarga = '/data_local/GCS/gcs/Imagenes/'
-            #self.dir_descarga = '/data1/work/gcs/Imagenes'
             self.nivel = nivel
             self.indices_descarga = ''
             self.image_type = image_type #puede ser img o seq
@@ -600,8 +599,8 @@ class cor2_downloader:
                 downloaded_files = Fido.fetch(self.search_cor2[w],path=download_path, max_conn=5, progress=True) 
                 print(downloaded_files.errors) 
             #os.system('chgrp -R gehme {}'.format(download_path))
-                os.system('chmod -R 775 {}'.format(download_path+self.search_cor2[w]['fileid'].split('/')[-1]))
-
+                #os.system('chmod -R 775 {}'.format(download_path+self.search_cor2[w]['fileid'].split('/')[-1]))
+                #TODO: pasar el nombre a minuscula xq la descarga es en minuscula.
         print(f'Archivos descargados en: {download_path}')
 
 
