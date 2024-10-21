@@ -439,7 +439,7 @@ class cor2_downloader:
     cor2_images.display()
     cor2_images.download()
     """
-    def __init__(self, start_time, end_time,nave,nivel='',image_type='',size=True):
+    def __init__(self, start_time, end_time,nave,nivel='',image_type='',size=True,cadence=a.Sample(10*u.min)):
         try:
             self.start_time = start_time
             self.end_time = end_time
@@ -452,6 +452,7 @@ class cor2_downloader:
             self.indices_descarga = ''
             self.image_type = image_type #puede ser img o seq
             self.size = size
+            self.cadence = cadence
         except TypeError:
             print("Be sure to add start_time, end_time, ship name, level/type of image when creating of object of this class.")
             raise
@@ -462,8 +463,8 @@ class cor2_downloader:
         """
         Definicion del metodo search
         """
-        search_cor2 = Fido.search(a.Time(self.start_time,self.end_time),self.instrumento,self.detector)
-        breakpoint()
+        search_cor2 = Fido.search(a.Time(self.start_time,self.end_time),self.instrumento,self.detector,self.cadence)
+        #breakpoint()
         if not search_cor2:
             print("No provider! No images available.")
             #global provider
