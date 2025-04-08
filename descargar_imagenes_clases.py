@@ -7,10 +7,10 @@ from sunpy.net import Fido, attrs as a
 from datetime import datetime, timedelta
 import os
 import matplotlib.pyplot as plt
-import pdb
+#import pdb
 import numpy as np
 import requests
-import calendar 
+#import calendar 
 import subprocess
 import requests
 
@@ -609,31 +609,14 @@ class aia_downloader:
     """
     Definicion de la clase aia Downloader
     Example:
-    from descargar_imagenes_clases import aia_downloader
-    import sunpy.map
-    import sunpy.data.sample 
-    from descargar_imagenes_clases import initial_final_time
-    import astropy.units as u
-    from astropy.io import fits
-    from sunpy.net import Fido, attrs as a
-    from datetime import datetime, timedelta
-    import os
-    import matplotlib.pyplot as plt
-    import pdb
-    import numpy as np
-    import requests
-
     t_ini='2010-12-12 10:00:00'
     t_fin='2010-12-12 15:00:00'
     ini,fin = initial_final_time(t_ini, t_fin, delta_t=50)
-
     aia_images = aia_downloader(start_time=ini,end_time=fin,cadence=15,wave=193)
     aia_images.search()
     aia_images.display()
     aia_images.dir_descarga='/data_local/work/gcs/Imagenes/193/'
-
     aia_images.download()
-    aia_images.decompress()
     """
 
     def __init__(self, start_time, end_time,size='',wave='',cadence=60,origin_download_path=False,band_folder=True):
@@ -660,14 +643,14 @@ class aia_downloader:
             self.origin_download_path = origin_download_path
             #dir where the images will be decompressed using decompress method.
             self.dir_decompress = ''
-            self.indices_descarga = '' #debe ser una lista
+            self.indices_descarga = '' #no utilizado en esta clase, ver definicion de filter en cor2_downloader.
             self.size = size
 
         except TypeError:
             print("Be sure to add start_time, end_time, ship name, level/type of image when creating of object of this class.")
             raise
         except:
-            print("WTF")
+            print("esto no deberia suceder. check.")
 
     def search(self):
         """
@@ -747,6 +730,7 @@ class aia_downloader:
             ax=plt.subplot(1,1,1)
             ax.plot(lista_color_azul,lista_cant_images_azul  ,'bo',label=str(self.wave_integer))
             ax.set_title(str(self.wave_integer))
+            ax.text(0.95, 0.95, f'#images={search_size}', color='red', transform=ax.transAxes,fontsize=16, verticalalignment='top', horizontalalignment='right')
             ax.legend()
             ax.set_xlabel('Dates')
             ax.set_ylabel('Images')   
@@ -758,6 +742,7 @@ class aia_downloader:
             ax=plt.subplot(1, 3, 1)
             ax.plot(lista_color_azul,lista_cant_images_azul  ,'bo',label='171')
             ax.set_title('171')
+            ax.text(0.95, 0.95, f'#images={search_size_171}', color='blue', transform=ax.transAxes,fontsize=16, verticalalignment='top', horizontalalignment='right')
             ax.legend()
             ax.set_xlabel('Dates')
             ax.set_ylabel('Images')            
@@ -766,6 +751,7 @@ class aia_downloader:
             ax=plt.subplot(1, 3, 2)
             ax.plot(lista_color_rojo,lista_cant_images_rojo  ,'ro',label='193')
             ax.set_title('193')
+            ax.text(0.95, 0.95, f'#images={search_size_193}', color='red', transform=ax.transAxes,fontsize=16, verticalalignment='top', horizontalalignment='right')
             ax.legend()
             ax.set_xlabel('Dates')
             ax.set_ylabel('Images')            
@@ -774,6 +760,7 @@ class aia_downloader:
             ax=plt.subplot(1, 3, 3)
             ax.plot(lista_color_verde,lista_cant_images_verde,'go',label='211')
             ax.set_title('211')
+            ax.text(0.95, 0.95, f'#images={search_size_211}', color='green', transform=ax.transAxes,fontsize=16, verticalalignment='top', horizontalalignment='right')
             ax.legend()
             ax.set_xlabel('Dates')
             ax.set_ylabel('Images')
@@ -796,11 +783,11 @@ class aia_downloader:
 
             if self.wave == '':
                 cantidad_171 = len(self.search_aia_171['vso'])
-                rango_descargas_171 = range(cantidad_171['vso'])
+                rango_descargas_171 = range(cantidad_171)
                 cantidad_193 = len(self.search_aia_193['vso'])
-                rango_descargas_193 = range(cantidad_193['vso'])
+                rango_descargas_193 = range(cantidad_193)
                 cantidad_211 = len(self.search_aia_211['vso'])
-                rango_descargas_211 = range(cantidad_211['vso'])
+                rango_descargas_211 = range(cantidad_211)
                 vec_rangos = [rango_descargas_171,rango_descargas_193,rango_descargas_211]
 
         if getattr(self,'indices_descarga') != '':  #'indice_descarga' debe ser una lista de enteros contenidos en [0,len(self.search_XXXX)]
@@ -814,7 +801,6 @@ class aia_downloader:
                     auxi = auxi+'/'
                 if self.band_folder == False:
                     auxi=''
-
                 #creating the folder
                 individual_start_time=str(self.search_aia['vso'][w]['Start Time'])
                 folder_string = individual_start_time[:10].replace('-', '')+'/'
@@ -832,8 +818,6 @@ class aia_downloader:
                     downloaded_files = Fido.fetch(self.search_aia['vso'][w],path=full_download_path, max_conn=5, progress=True)
                     print(downloaded_files.errors)
         
-        
-        
         if self.wave == '':   
             list_errors=[]      
             search_total = [self.search_aia_171,self.search_aia_193,self.search_aia_211]
@@ -850,9 +834,8 @@ class aia_downloader:
                             auxi = '211/'    
                     if self.band_folder == False:
                         auxi=''
-                    
-                    individual_start_time=str(search_total[index]['Start Time'])
-                    folder_string = individual_start_time[:10].replace('-', '')+'/'
+                    individual_start_time=search_total[index]['vso']['Start Time']
+                    folder_string = individual_start_time.to_datetime()[0].tolist().strftime("%Y%m%d")
                     if self.origin_download_path == True:
                         full_download_path = download_path+auxi+folder_string
                     if self.origin_download_path == False:
