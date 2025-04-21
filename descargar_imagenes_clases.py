@@ -1237,12 +1237,13 @@ class nrl_massive_downloader:
         for index,date in enumerate(self.list_dates):
             url = f"https://lasco-www.nrl.navy.mil/lz/level_05/{date}/{self.instrument}/"
             folder = self.folder_list[index]
-            response = requests.head(url, allow_redirects=True)
+            response = requests.head(url, allow_redirects=True, verify=False)
             if response == 404:
                 print(f"Date {date} not available")
             if response.status_code == 200:
                 try:
-                    command = ["wget", "-m", "-nH", "--cut-dirs=4", "-np", "-A", "fts", url, "-P", self.dir_descarga+str(folder)+"/"]
+                    command = ["wget", "--mirror", "-nH", "--cut-dirs=4", "-np", "-A", "fts", "--no-check-certificate" ,url, "-P", self.dir_descarga+str(folder)+"/"]
+                    print(f"Downloading date {date}... from {url}")
                     subprocess.run(command, check=True)
                     print(f"Date {date} downloaded")
                 except subprocess.CalledProcessError:
